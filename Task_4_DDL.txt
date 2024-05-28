@@ -1,0 +1,87 @@
+-- Create the Data Warehouse Database
+CREATE DATABASE RetailDWH;
+
+-- Use the newly created database
+USE RetailDWH;
+
+-- Create Schemas
+CREATE SCHEMA master;
+CREATE SCHEMA transaction;
+CREATE SCHEMA staging;
+
+-- Create Customer Dimension Table
+CREATE TABLE master.Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100),
+    SegmentID INT,
+    FOREIGN KEY (SegmentID) REFERENCES master.Segments(SegmentID)
+);
+
+-- Create Segment Dimension Table
+CREATE TABLE master.Segments (
+    SegmentID INT PRIMARY KEY,
+    SegmentName VARCHAR(50)
+);
+
+-- Create Product Dimension Table
+CREATE TABLE master.Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(100),
+    SubCategoryID INT,
+    FOREIGN KEY (SubCategoryID) REFERENCES master.ProductSubCategories(SubCategoryID)
+);
+
+-- Create Product Sub-Category Dimension Table
+CREATE TABLE master.ProductSubCategories (
+    SubCategoryID INT PRIMARY KEY,
+    SubCategoryName VARCHAR(50),
+    CategoryID INT,
+    FOREIGN KEY (CategoryID) REFERENCES master.ProductCategories(CategoryID)
+);
+
+-- Create Product Category Dimension Table
+CREATE TABLE master.ProductCategories (
+    CategoryID INT PRIMARY KEY,
+    CategoryName VARCHAR(50)
+);
+
+-- Create Geography Dimension Table
+CREATE TABLE master.Geographies (
+    GeographyID INT PRIMARY KEY,
+    Country VARCHAR(50),
+    State VARCHAR(50),
+    City VARCHAR(50),
+    PostalCode VARCHAR(20),
+    RegionID INT,
+    FOREIGN KEY (RegionID) REFERENCES master.Regions(RegionID)
+);
+
+-- Create Region Dimension Table
+CREATE TABLE master.Regions (
+    RegionID INT PRIMARY KEY,
+    RegionName VARCHAR(50)
+);
+
+-- Create Time Dimension Table
+CREATE TABLE master.Time (
+    DateID INT PRIMARY KEY,
+    OrderDate DATE,
+    ShipDate DATE
+);
+
+-- Create Sales Fact Table
+CREATE TABLE transaction.Sales (
+    OrderID INT PRIMARY KEY,
+    ProductID INT,
+    CustomerID INT,
+    DateID INT,
+    GeographyID INT,
+    Sales DECIMAL(10, 2),
+    Quantity INT,
+    Discount DECIMAL(5, 2),
+    Profit DECIMAL(10, 2),
+    FOREIGN KEY (ProductID) REFERENCES master.Products(ProductID),
+    FOREIGN KEY (CustomerID) REFERENCES master.Customers(CustomerID),
+    FOREIGN KEY (DateID) REFERENCES master.Time(DateID),
+    FOREIGN KEY (GeographyID) REFERENCES master.Geographies(GeographyID)
+);
